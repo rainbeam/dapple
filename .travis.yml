@@ -1,3 +1,9 @@
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
 language: node_js
 node_js:
   - "5.1"
@@ -9,5 +15,22 @@ addons:
     packages:
     - g++-4.8
 
-env: 
-  - CXX=g++-4.8 
+env:
+  global:
+  - CXX=g++-4.8
+  - secure: "gQZufI+949wmARepr9AuhCcfxbyLsWOmSaUR1wkrwO0dD9kuW4dwucMXRhPxe/ddkx4in3jXWyIx1S/7u7PMoaULlPLO70h606chq97zKr/TE9TcQv3VLLb7i1Ri66ZMKYmyV99jXNuuzi5mUQHXmOfRQFsvGIY1iQJMa2w+lETgBA8Ulsu3QUQOK4iU3nAlECb4TFUzdPg+KUH8csuaUZgoXn2tqVJeu+uHgdbPceIn07cR5vY1yCzgslRNCmIDaJzOWljGug275/tR2er7iZo7DbnYq8PNRc44APxC96G+xwQ6n+gLiClMZPgoFJLgCt90N6f4aQNtOT4gtPv1SeHtPIcJQlzzT26wmzf2gazP+WToC+hzycDb99C8i17hhXIl/u9HuhRB45FeYOpoTy89O0SoLEp+f4MvP03mKuj2HScxcaqKgUI/XUF6mwtDpqIA6DxkT3VL8ZI9Yl0te/yj356hsT4KyvlemQ84wX/awINJJiVwGBrP1meFljQC2fnxpTkBQvWUFkuFivjYUB1TJqxHC5CeiD+q5rBne1oOV3Q4DkmxhgXfjZi3QzCdrZRfsopoOQgjEJ86mAaGzQqIgnmm5mxvxz9Z4fPBAweYFn0i4+/AF/u4AL0cg5yXP6COd033haxVon8zqTRG6mmzi8Dq0oGX4EH4/2XXc60="
+  - secure: "RxbA3Xnt9w2V6wruKYSMZPrJGRTUDiHKOX7/GEGKj+TJKd+s3VZ+oZzYrkjw0EFtMZdqWDwLJMkAxJpcjtjr/1YqoCG4Xb57CfOG1nt0i0J5g8n8zlLawJubhsm++AsEvakPJGMa1eaYNn295hZ8qeQSJ7m0D8gwZRt1wZaGo0HNj/vfSZ57Rsjd35n79MmPO+HQBxV0WcoMAHN5ot0/QrFhrX+QqKkRz1YINv72as952hyHYgmHaeqK07ehde+6VhLzpigL1EZRw/awvxbXJi4EF012JphdDZVEZD4Wu7sBpKIohWSier6Q1BiCwUi1wU/63v83q8kCExVlqJBDMAeUx/L+hQsu907jVkUkS3JrIo7sursada5SeRXNqm3gfHuPbK3vKwd2g6NSmPquT0+wWyjMa3vItPsUewhblFhvJDAsRwIbNjH5r9ybyTZkFTAae0w2ag967SNMtOayATdn1wgTT4UeJq0AHvtwJI05m2fuwOSbdhNW/AxUf2yu3Fv5v0IqilehTCOO1N3d/KRpm1lK0ICDzJDnyYSHCEsVmVJalVZWeV5sO0Ds/muqHFJdpfFkiXwlYQP6hHXj0+WI0tOjrQomxn+ymIjc7heIh/5U5JhzeTRz3+cR5cudvbVXZvCAyKALOyb34Kn0t1hShyriC6BLuM/Jh8KE+1w="
+  - secure: "qvcYoG/M09+BP+ZhtP+0aTPifLxs/DtZd8nsGMFrpoX9EYy49VU9yUFO7y9VNsS+Jons5RV5mBQx/YdTP7/d4Ciw5DaZAzUgFHPZuXzZyjwH+infjhezf1IlT75Sle+JFUOexqybr3vlsj1h5wnxY3jHgRUDcLxr88l/YuLfpO3DDG5D6lk0DG3AiXRAHZ52O3tFEbX0PJhrNLGlpkDsIqRtlyGFoqZSmwcqr4O9KH52jvN6Ufs7IeA5YsD7vYUsnBO9LXghz+IroTP0xOBXvHLJanvnCzx0sevUNwRuBuSUv02mntpjA2ERMHkQI8wzeIuMCuFYA2yTX/zvjdfWxVXb8rDvhF122cl9YCWzQbMFQ9t/kkxZ6Og6otyEJ+R9vBHC6YUi4InODjK4/OLv2WEjWN5xQZ9p1XjEb9XmFhjuJmqdR4bpXjp9NoMdy9EjD1GyGcFbLBqIFgIif0EHro4B14XPhMZ4RjmjkT8loClUP17sPwBp1/2DA25uzP3nFRgRkMWS8Oz2MNqq13VCLCXg1ByquoMpGQyqZe1hRd75tet+Nd6Y/eiMbAJ46u+aXoD1DD2nfwJ9++RhEPI1sg9baF3KNum4irayTlDhNj62FSsC0IJYcKW2qW3dxDw1YpKR6ZYQVnm7azrhWbePoLVDODA2nugZW+CrAgxM1+k="
+
+after_success:
+  - docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
+  - export REPO=rainbeam/dapple-minimal
+  - export COMMIT=${TRAVIS_COMMIT::8}
+  - |
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+      export TAG="latest"
+      else export TAG=$TRAVIS_BRANCH
+    fi
+  - docker build -f Dockerfile.minimal -t $REPO:$COMMIT .
+  - docker tag $REPO:$COMMIT $REPO:$TAG
+  - docker push $REPO
