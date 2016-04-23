@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+# Make sure we have the same UID and GID as the host user
+uid=`stat -c %u .` gid=`stat -c %g .`
+addgroup -g $gid $GROUP
+adduser -D -u $uid -h $HOME $USER -G $GROUP
+exec su-exec $USER ${entrypoint-dapple} "$@"

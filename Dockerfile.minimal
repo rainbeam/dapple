@@ -1,0 +1,24 @@
+FROM mhart/alpine-node:5.10.1
+
+COPY package.json /dapple/package.json
+
+WORKDIR /dapple
+
+# su-exec is like gosu but much smaller
+RUN apk add --no-cache su-exec
+
+RUN apk add --no-cache --virtual build-deps bash make gcc g++ python git curl && \
+    apk add hardlink --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ && \
+    curl -L https://github.com/rainbeam/solidity-static/releases/download/v0.1-alpha/solc >> /usr/local/bin/solc && \
+    chmod +x /usr/local/bin/solc && \
+    npm set progress false && \
+    npm install && \
+    hardlink -ot node_modules && \
+    find node_modules -type d -name test | xargs rm -rf && \
+    apk del build-deps hardlink && \
+    npm cache clean && \
+    rm -rf /tmp/*
+
+COPY . /dapple
+RUN npm link
+ENTRYPOINT ["/dapple/docker-entrypoint.alpine"]
